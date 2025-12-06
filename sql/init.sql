@@ -1,0 +1,10 @@
+CREATE DATABASE IF NOT EXISTS fs_db;
+USE fs_db;
+
+CREATE TABLE IF NOT EXISTS items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO items (name) VALUES ('Sample item 1'), ('Sample item 2');
