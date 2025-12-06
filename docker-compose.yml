@@ -2,23 +2,28 @@ version: "3.8"
 services:
   db:
     image: mysql:8.0
+    container_name: fs_project-db-1 # 建议添加 container_name 方便识别
+    restart: always                # 建议添加 restart 策略
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ROOT_PASSWORD: root_pass
       MYSQL_DATABASE: fs_db
       MYSQL_USER: fs_user
       MYSQL_PASSWORD: fs_pass
     ports:
       - "3306:3306"
     volumes:
+      # 💡 关键修改：将本地的 ./sql 目录挂载到 MySQL 的初始化目录
+      - ./sql:/docker-entrypoint-initdb.d 
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin","ping","-h","localhost"]
+      test: ["CMD", "mysqladmin","ping","-h","localhost", "-u", "root", "-proot_pass"] # 建议添加用户和密码，确保健康检查有效
       interval: 10s
       timeout: 5s
       retries: 5
 
   backend:
     build: ./backend
+    container_name: fs_project-backend-1 # 建议添加 container_name
     ports:
       - "4000:4000"
     environment:
@@ -31,10 +36,13 @@ services:
 
   frontend:
     build: ./frontend
+    container_name: fs_project-frontend-1 # 建议添加 container_name
     ports:
       - "3000:80"
     environment:
       - REACT_APP_API_URL=http://localhost:4000
+    depends_on:
+      - backend # 建议依赖后端，确保前端启动时后端已就绪
 
 volumes:
   db_data:
