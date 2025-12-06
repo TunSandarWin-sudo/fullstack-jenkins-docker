@@ -10,6 +10,7 @@ pipeline {
         DB_USER = "fs_user" 
         DB_PASS = "fs_pass" 
         DB_NAME = "fs_db" 
+        DB_PORT = "3306"
     }
 
     stages {
