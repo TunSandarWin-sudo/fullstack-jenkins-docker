@@ -2,7 +2,8 @@ pipeline {
   agent any
 
   environment {
-    COMPOSE_PROJECT_NAME = "fs_project"
+    COMPOSE_PROJECT_NAME = "fs_project",
+    DB_HOST = "db"
   }
 
   stages {
@@ -24,27 +25,39 @@ pipeline {
       steps {
         // 使用 docker compose 启动（假设 jenkins 有权限与 docker daemon 通信）
         sh 'docker compose down || true'
-        sh 'docker compose up -d --build'
+        sh 'docker compose up -d'
       }
     }
 
     stage('Health Check') {
-      steps {
-        // 简单的 health check：访问后端 /items endpoint
+    steps {
         sh '''
-          set -e
-          for i in 1 2 3 4 5; do
-            if curl -sS http://localhost:4000/items | grep -q "Sample"; then
-              echo "health ok"
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "health check failed"
-          exit 1
+            set -e
+            MAX_ATTEMPTS=15
+            DELAY=5
+            URL="http://localhost:4000/items"
+            EXPECTED_TEXT="Sample"
+
+            echo "Starting Health Check on $URL. Max attempts: $MAX_ATTEMPTS, Delay: $DELAY seconds."
+
+            for i in $(seq 1 $MAX_ATTEMPTS); do
+              echo "Attempt $i/$MAX_ATTEMPTS: Checking backend..."
+              
+              # curl --fail 确保只有 HTTP 状态码为 2xx 时才算成功
+              if curl -sS --fail --max-time 5 $URL | grep -q "$EXPECTED_TEXT"; then
+                echo "Health check succeeded!"
+                exit 0
+              fi
+
+              echo "Check failed, sleeping..."
+              sleep $DELAY
+            done
+
+            echo "ERROR: Health check failed after $MAX_ATTEMPTS attempts."
+            exit 1
         '''
-      }
     }
+}
   }
 
   post {

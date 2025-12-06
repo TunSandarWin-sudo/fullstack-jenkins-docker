@@ -1,25 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
 
-function App() {
+export default function App(){
+  const [items, setItems] = useState([]);
+  const [name, setName] = useState('');
+
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/items`)
+      .then(r=>r.json())
+      .then(setItems)
+      .catch(console.error);
+  }, []);
+
+  const create = async () => {
+    if(!name) return;
+    const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/items`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name})
+    });
+    const data = await res.json();
+    setItems(prev => [...prev, data]);
+    setName('');
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{padding:20}}>
+      <h1>Items</h1>
+      <ul>
+        {items.map(i=> <li key={i.id}>{i.name}</li>)}
+      </ul>
+      <input value={name} onChange={e=>setName(e.target.value)} placeholder="New item"/>
+      <button onClick={create}>Create</button>
     </div>
   );
 }
 
-export default App;
