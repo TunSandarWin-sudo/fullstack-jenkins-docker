@@ -82,9 +82,6 @@ pipeline {
         failure {
             echo "❌ Pipeline failed during one of the stages."
         }
-        always {
-            // 可选：在 Pipeline 结束时清理工作空间以节省空间
-            // cleanWs()
-        }
+        
     }
 }
