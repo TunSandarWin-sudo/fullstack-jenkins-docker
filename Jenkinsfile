@@ -2,14 +2,12 @@ pipeline {
   agent any
 
   environment {
-    COMPOSE_PROJECT_NAME = "fs_project"
-    // 确保也添加了 DB_HOST 覆盖来解决部署问题
+    COMPOSE_PROJECT_NAME = "fs_project"
     DB_HOST = "db" 
-    // 确保其他数据库变量也在这里或在 docker-compose.yml 中配置
     DB_USER = "fs_user" 
     DB_PASS = "fs_pass" 
-    DB_NAME = "fs_db"
-  }
+    DB_NAME = "fs_db" 
+  }
 
   stages {
     stage('Checkout') {
